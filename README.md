@@ -52,13 +52,13 @@ The Program Execution Workbench is an AI-powered decision support system that he
 ### Prerequisites
 
 - Python 3.10+
-- Google Cloud account with API access (for Gemini models)
+- Anthropic API key (for Claude models)
 
 ### Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/adk-project.git
+git clone https://github.com/jam1245/adk-project.git
 cd adk-project
 
 # Create virtual environment
@@ -75,7 +75,7 @@ pip install -r requirements.txt
 
 # Copy environment template and configure
 cp .env.example .env
-# Edit .env with your Google API key
+# Edit .env with your Anthropic API key
 ```
 
 ### Environment Variables
@@ -83,15 +83,64 @@ cp .env.example .env
 Edit `.env` and set:
 
 ```
-GOOGLE_API_KEY=your-google-api-key-here
-MODEL_NAME=gemini-2.0-flash
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
 LOG_LEVEL=INFO
 MAX_REFINEMENT_ITERATIONS=3
 ```
 
+Get your Anthropic API key at: https://console.anthropic.com/
+
 ## Usage
 
-### Running Demo Scenarios
+### ADK Web UI (Recommended)
+
+The easiest way to interact with the agents is through Google ADK's built-in Web UI. This provides a browser-based chat interface for testing all agents.
+
+**Start the Web UI:**
+
+```bash
+# Navigate to the project directory
+cd adk-project
+
+# Start the ADK web server
+adk web adk_agents --port 8000
+```
+
+**Open in Browser:**
+
+Navigate to http://127.0.0.1:8000
+
+**Using the Web UI:**
+
+1. Select an agent from the dropdown menu at the top
+2. Type your message in the chat input
+3. Press Enter or click Send to interact with the agent
+
+**Available Agents:**
+
+| Agent | Description |
+|-------|-------------|
+| `pm_agent` | Program Manager - Executive synthesis and leadership briefs |
+| `cam_agent` | Cost Account Manager - EVM analysis, variance drivers, EAC projections |
+| `rca_agent` | Root Cause Analysis - 5 Whys, Fishbone, 8D methodology |
+| `risk_agent` | Risk Manager - 5x5 matrix, risk exposure calculations |
+| `contracts_agent` | Contracts - FAR/DFARS compliance, modification analysis |
+| `sq_agent` | Supplier/Quality - OTDP, DPMO, quality escape investigation |
+| `orchestrator` | Full Workbench - All 23 tools, complete multi-agent analysis |
+
+**Example Prompts:**
+
+- For `cam_agent`: "What are the current EVM metrics and variance drivers?"
+- For `risk_agent`: "Calculate the total risk exposure for the program"
+- For `orchestrator`: "Explain why CPI dropped to 0.87 and recommend corrective actions"
+
+**Stopping the Server:**
+
+Press `Ctrl+C` in the terminal running the server.
+
+---
+
+### Running Demo Scenarios (CLI)
 
 The workbench includes three pre-configured demo scenarios:
 
@@ -141,6 +190,14 @@ In interactive mode, you can:
 
 ```
 adk-project/
+├── adk_agents/              # ADK Web UI agent wrappers
+│   ├── pm_agent/            # Program Manager agent
+│   ├── cam_agent/           # Cost Account Manager agent
+│   ├── rca_agent/           # Root Cause Analysis agent
+│   ├── risk_agent/          # Risk Manager agent
+│   ├── contracts_agent/     # Contracts agent
+│   ├── sq_agent/            # Supplier/Quality agent
+│   └── orchestrator/        # Full multi-agent orchestrator
 ├── src/
 │   ├── agents/              # Specialist agent implementations
 │   │   ├── pm_agent.py
@@ -154,10 +211,10 @@ adk-project/
 │   │   ├── parallel_analysis.py
 │   │   ├── refinement.py    # Contradiction resolution
 │   │   └── orchestrator.py  # Main coordinator
-│   ├── tools/               # Agent tools
-│   │   ├── data_tools.py    # Data retrieval
-│   │   ├── analysis_tools.py
-│   │   ├── artifact_tools.py
+│   ├── tools/               # Agent tools (23 total)
+│   │   ├── data_tools.py    # Data retrieval (9 tools)
+│   │   ├── analysis_tools.py # Analysis (8 tools)
+│   │   ├── artifact_tools.py # Artifact generation (6 tools)
 │   │   └── tool_registry.py
 │   ├── state/               # State management
 │   │   ├── models.py        # Pydantic models
@@ -166,7 +223,7 @@ adk-project/
 │   ├── contradiction/       # Contradiction detection
 │   ├── observability/       # Logging, metrics, tracing
 │   └── mock_data/           # Demo data
-├── tests/                   # Test suite
+├── tests/                   # Test suite (20 tests)
 ├── demos/                   # Demo scenarios
 ├── outputs/                 # Generated artifacts
 │   ├── briefs/
