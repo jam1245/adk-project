@@ -2,6 +2,8 @@
 Unit tests for specialist agents.
 """
 
+import os
+
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -15,8 +17,8 @@ from src.agents.contracts_agent import create_contracts_agent, CONTRACTS_SYSTEM_
 from src.agents.sq_agent import create_sq_agent, SQ_SYSTEM_PROMPT
 from src.tools.tool_registry import ToolRegistry
 
-# Expected model used by all agents
-EXPECTED_MODEL = "anthropic/claude-3-haiku-20240307"
+# Expected model — reads from env so tests pass regardless of provider
+EXPECTED_MODEL = os.getenv("LLM_MODEL", "anthropic/claude-3-haiku-20240307")
 
 
 def check_agent_model(agent):

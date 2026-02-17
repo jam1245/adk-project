@@ -6,12 +6,9 @@ analysis, compliance assessment, and contractual risk identification.
 """
 
 from google.adk import Agent
-from google.adk.models.lite_llm import LiteLlm
 
+from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
-
-# Use Claude 3 Haiku - cheapest and fastest Claude model
-CLAUDE_MODEL = LiteLlm(model="anthropic/claude-3-haiku-20240307")
 
 CONTRACTS_SYSTEM_PROMPT = """You are the Contracts Agent, an expert in defense contract administration and FAR/DFARS compliance.
 
@@ -118,7 +115,7 @@ def create_contracts_agent(registry: ToolRegistry | None = None) -> Agent:
 
     return Agent(
         name="contracts_agent",
-        model=CLAUDE_MODEL,
+        model=get_model(),
         instruction=CONTRACTS_SYSTEM_PROMPT,
         tools=tools,
     )

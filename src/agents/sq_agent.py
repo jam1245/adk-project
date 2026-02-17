@@ -6,12 +6,9 @@ investigation, and supply chain risk management.
 """
 
 from google.adk import Agent
-from google.adk.models.lite_llm import LiteLlm
 
+from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
-
-# Use Claude 3 Haiku - cheapest and fastest Claude model
-CLAUDE_MODEL = LiteLlm(model="anthropic/claude-3-haiku-20240307")
 
 SQ_SYSTEM_PROMPT = """You are the Supplier/Quality (S/Q) Agent, an expert in supply chain management and quality assurance for defense acquisition programs.
 
@@ -135,7 +132,7 @@ def create_sq_agent(registry: ToolRegistry | None = None) -> Agent:
 
     return Agent(
         name="sq_agent",
-        model=CLAUDE_MODEL,
+        model=get_model(),
         instruction=SQ_SYSTEM_PROMPT,
         tools=tools,
     )

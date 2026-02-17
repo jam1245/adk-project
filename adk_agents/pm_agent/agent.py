@@ -14,16 +14,14 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from google.adk import Agent
-from google.adk.models.lite_llm import LiteLlm
 
+from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
 
 # Initialize registry and get tools
 registry = ToolRegistry()
 tools = registry.get_tools_for_agent("pm_agent")
-
-# Claude 3 Haiku model
-model = LiteLlm(model="anthropic/claude-3-haiku-20240307")
+model = get_model()
 
 root_agent = Agent(
     name="pm_agent",

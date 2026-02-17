@@ -7,12 +7,9 @@ action plans.
 """
 
 from google.adk import Agent
-from google.adk.models.lite_llm import LiteLlm
 
+from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
-
-# Use Claude 3 Haiku - cheapest and fastest Claude model
-CLAUDE_MODEL = LiteLlm(model="anthropic/claude-3-haiku-20240307")
 
 CAM_SYSTEM_PROMPT = """You are the Control Account Manager (CAM) Agent, an expert in Earned Value Management (EVM) for defense acquisition programs.
 
@@ -102,7 +99,7 @@ def create_cam_agent(registry: ToolRegistry | None = None) -> Agent:
 
     return Agent(
         name="cam_agent",
-        model=CLAUDE_MODEL,
+        model=get_model(),
         instruction=CAM_SYSTEM_PROMPT,
         tools=tools,
     )

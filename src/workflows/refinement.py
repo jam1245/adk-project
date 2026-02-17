@@ -9,12 +9,9 @@ resolved or max iterations is reached.
 from google.adk import Agent
 from google.adk.agents import LoopAgent
 from google.adk.tools import FunctionTool
-from google.adk.models.lite_llm import LiteLlm
 
+from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
-
-# Use Claude 3 Haiku - cheapest and fastest Claude model
-CLAUDE_MODEL = LiteLlm(model="anthropic/claude-3-haiku-20240307")
 
 REFINEMENT_AGENT_PROMPT = """You are the Refinement Agent responsible for resolving contradictions between specialist agent findings.
 
@@ -71,7 +68,7 @@ def create_refinement_agent() -> Agent:
     """
     return Agent(
         name="refinement_agent",
-        model=CLAUDE_MODEL,
+        model=get_model(),
         instruction=REFINEMENT_AGENT_PROMPT,
         tools=[],
     )
