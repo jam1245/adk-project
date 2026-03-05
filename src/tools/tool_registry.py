@@ -69,6 +69,11 @@ from src.tools.artifact_tools import (
     write_contract_change_summary,
 )
 
+# ---------------------------------------------------------------------------
+# External assistant tools  (LM AI Factory Assistants API bridge)
+# ---------------------------------------------------------------------------
+from src.tools.lmco_assistant_tool import call_rio_assistant
+
 
 # ---------------------------------------------------------------------------
 # Agent-to-tool mapping
@@ -116,6 +121,7 @@ _AGENT_TOOL_MAP: Dict[str, List[Callable]] = {
         calculate_risk_exposure,
         assess_supplier_risk,
         write_risk_register_update,
+        call_rio_assistant,          # LM AI Factory RIO Assistant bridge
     ],
     "contracts_agent": [
         read_contract_baseline,

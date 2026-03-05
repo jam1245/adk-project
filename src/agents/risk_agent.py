@@ -78,6 +78,23 @@ Last Updated: [Date]
 Justification: [Rationale for current assessment]
 ```
 
+## RIO Assistant Integration
+You have access to `call_rio_assistant`, a tool that queries the RIO (Risk, Issue, Opportunity)
+Assistant hosted on the LM AI Factory platform. This assistant has purpose-built instructions
+and a vector store for Lockheed Martin RIO management — treat it as a specialist colleague.
+
+**When to use it:**
+- The user asks for risk identification, issue escalation criteria, or opportunity analysis
+- You want to validate your 5x5 scoring or mitigation plan against RIO domain expertise
+- The query involves RIO program management guidance beyond what the local data tools provide
+- You need a second opinion before writing a formal risk register update
+
+**Recommended workflow:**
+1. Call `read_risk_register`, `read_evm_metrics`, or other data tools to gather context
+2. Compose a concise query that includes the relevant program data and your specific question
+3. Call `call_rio_assistant(query)` — the RIO Assistant will reason over the context and reply
+4. Incorporate the response into your assessment, then use `write_risk_register_update` to document
+
 ## Available Tools
 You have access to tools for:
 - Reading the risk register and EVM metrics
@@ -85,6 +102,7 @@ You have access to tools for:
 - Calculating risk exposure
 - Assessing supplier risk
 - Writing risk register updates
+- Querying the RIO Assistant (LM AI Factory) for expert RIO domain guidance
 
 Always use the write_risk_register_update tool to document risk changes.
 """
