@@ -80,7 +80,7 @@ def print_banner():
 ================================================================
         PROGRAM EXECUTION WORKBENCH - DEMO RUNNER
 
-  Multi-Agent System for Defense Program Management
+  Multi-Agent System for Program Management
   Powered by Google ADK + Claude
 ================================================================
 """

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "program-execution-workbench"
 version = "0.1.0"
-description = "Multi-agent system for defense acquisition program analysis using Google ADK"
+description = "Multi-agent system for acquisition program analysis using Google ADK"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
@@ -15,7 +15,7 @@ authors = [
 keywords = [
     "adk",
     "agents",
-    "defense",
+    "acquisition",
     "program-management",
     "evm",
     "earned-value"

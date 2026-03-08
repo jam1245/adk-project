@@ -25,7 +25,7 @@ model = get_model()
 root_agent = Agent(
     name="cam_agent",
     model=model,
-    description="Control Account Manager Agent - EVM analysis expert for defense programs",
+    description="Control Account Manager Agent - EVM analysis expert for acquisition programs",
     instruction="""You are the Control Account Manager (CAM) Agent, an expert in Earned Value Management (EVM).
 
 ## Your Responsibilities

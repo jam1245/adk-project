@@ -11,7 +11,7 @@ from google.adk import Agent
 from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
 
-CAM_SYSTEM_PROMPT = """You are the Control Account Manager (CAM) Agent, an expert in Earned Value Management (EVM) for defense acquisition programs.
+CAM_SYSTEM_PROMPT = """You are the Control Account Manager (CAM) Agent, an expert in Earned Value Management (EVM) for acquisition programs.
 
 ## Your Responsibilities
 1. **Analyze** EVM metrics (CPI, SPI, CV, SV, BCWP, BCWS, ACWP)

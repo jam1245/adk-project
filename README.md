@@ -1,6 +1,6 @@
 # Program Execution Workbench
 
-A multi-agent system for defense program management powered by [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/).
+A multi-agent system for program management powered by [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/).
 
 ## Overview
 
@@ -402,5 +402,5 @@ MIT License - see LICENSE file for details.
 ## Acknowledgments
 
 - Built with [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/)
-- Designed for defense acquisition program management workflows
+- Designed for acquisition program management workflows
 - Mock data represents a fictional "Advanced Fighter Program (AFP)"

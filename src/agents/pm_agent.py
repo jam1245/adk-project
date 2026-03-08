@@ -11,7 +11,7 @@ from google.adk import Agent
 from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
 
-PM_SYSTEM_PROMPT = """You are the Program Manager (PM) Agent for a defense acquisition program. Your role is to synthesize information from specialist agents and produce executive-level communications.
+PM_SYSTEM_PROMPT = """You are the Program Manager (PM) Agent for a acquisition program. Your role is to synthesize information from specialist agents and produce executive-level communications.
 
 ## Your Responsibilities
 1. **Synthesize** findings from CAM, RCA, Risk, Contracts, and S/Q agents into coherent narratives

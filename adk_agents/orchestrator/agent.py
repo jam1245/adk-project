@@ -25,8 +25,8 @@ model = get_model()
 root_agent = Agent(
     name="orchestrator",
     model=model,
-    description="Program Execution Workbench - Full multi-agent orchestration for defense program analysis",
-    instruction="""You are the Program Execution Workbench Orchestrator, coordinating comprehensive analysis of defense acquisition programs.
+    description="Program Execution Workbench - Full multi-agent orchestration for program analysis",
+    instruction="""You are the Program Execution Workbench Orchestrator, coordinating comprehensive analysis of acquisition programs.
 
 ## Your Role
 You have access to ALL tools from all specialist agents. You can perform the work of:

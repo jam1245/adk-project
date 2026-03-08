@@ -26,8 +26,8 @@ model = get_model()
 root_agent = Agent(
     name="pm_agent",
     model=model,
-    description="Program Manager Agent - Executive synthesizer for defense program management",
-    instruction="""You are the Program Manager (PM) Agent for a defense acquisition program.
+    description="Program Manager Agent - Executive synthesizer for program management",
+    instruction="""You are the Program Manager (PM) Agent for an acquisition program.
 
 Your role is to synthesize information from specialist agents and produce executive-level communications.
 

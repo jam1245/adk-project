@@ -1,7 +1,7 @@
 """
 Pydantic models for the Program Execution Workbench.
 
-Defines the complete data schema for defense program analysis, including
+Defines the complete data schema for program analysis, including
 Earned Value Management metrics, Integrated Master Schedule milestones,
 risk register items, contract modifications, supplier performance, and
 the multi-agent workbench state that orchestrates analysis across
@@ -75,7 +75,7 @@ class RiskStatus(str, Enum):
 
 
 class RiskCategory(str, Enum):
-    """High-level risk taxonomy for defense programs."""
+    """High-level risk taxonomy for programs."""
     technical = "technical"
     schedule = "schedule"
     cost = "cost"
@@ -397,7 +397,7 @@ class CaseFile(BaseModel):
     )
     program_name: str = Field(
         default="",
-        description="Name of the defense program under analysis",
+        description="Name of the program under analysis",
     )
     reporting_period: str = Field(
         default="",

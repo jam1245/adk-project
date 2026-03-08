@@ -1,6 +1,6 @@
 # Program Execution Workbench — AI Agent Guide
 
-> **Purpose of this document:** Full project context for an AI assistant (e.g., gpt-oss-120b) working on this codebase. Covers architecture, every agent, every tool, all environment variables, the LM AI Factory integration, and how to extend the project. Read this before touching any file.
+> **Purpose of this document:** Full project context for an AI assistant working on this codebase. Covers architecture, every agent, every tool, all environment variables, the external assistant integration, and how to extend the project. Read this before touching any file.
 
 ---
 
@@ -14,7 +14,7 @@
 6. [LLM Configuration](#6-llm-configuration)
 7. [Specialist Agents](#7-specialist-agents)
 8. [Tool System — All 24 Tools](#8-tool-system--all-24-tools)
-9. [LM AI Factory Integration (RIO Assistant)](#9-lm-ai-factory-integration-rio-assistant)
+9. [External Assistant Integration (External Assistant)](#9-external-assistant-integration-rio-assistant)
 10. [Workflow Pipeline](#10-workflow-pipeline)
 11. [State Management](#11-state-management)
 12. [Mock Data — The Simulated Program](#12-mock-data--the-simulated-program)
@@ -31,7 +31,7 @@
 
 ## 1. What This Project Is
 
-**Program Execution Workbench** is a multi-agent AI system for defense acquisition program management. It uses Google ADK (Agent Development Kit) to orchestrate six specialist AI agents that analyze cost performance, schedule, risk, contracts, and supplier quality — and synthesize findings into executive-level reports.
+**Program Execution Workbench** is a multi-agent AI system for acquisition program management. It uses Google ADK (Agent Development Kit) to orchestrate six specialist AI agents that analyze cost performance, schedule, risk, contracts, and supplier quality — and synthesize findings into executive-level reports.
 
 ### Primary use cases
 - Explain a cost or schedule variance (EVM analysis)
@@ -46,7 +46,7 @@
 | Agent framework | [Google ADK](https://google.github.io/adk-docs/) (`google-adk>=1.15.0`) |
 | LLM abstraction | LiteLLM (via `google.adk.models.lite_llm.LiteLlm`) |
 | Default LLM | Anthropic Claude 3 Haiku (switchable via env vars) |
-| External assistant | LM AI Factory (OpenAI Assistants API, on-prem) |
+| External assistant | OpenAI Assistants API (configurable endpoint) |
 | Data | Python mock data modules (no database needed) |
 | Output | Markdown files written to `outputs/` |
 
@@ -81,7 +81,7 @@ adk-project/
 │   │   ├── pm_agent.py       # Program Manager
 │   │   ├── cam_agent.py      # Control Account Manager
 │   │   ├── rca_agent.py      # Root Cause Analysis
-│   │   ├── risk_agent.py     # Risk Management (+ RIO Assistant tool)
+│   │   ├── risk_agent.py     # Risk Management (+ External Assistant tool)
 │   │   ├── contracts_agent.py # Contracts & FAR/DFARS
 │   │   └── sq_agent.py       # Supplier Quality
 │   │
@@ -96,7 +96,7 @@ adk-project/
 │   │   ├── data_tools.py     # 10 read tools (EVM, risks, milestones, etc.)
 │   │   ├── analysis_tools.py # 8 compute tools (EAC, exposure, variance)
 │   │   ├── artifact_tools.py # 6 write tools (briefs, 8D, risk updates)
-│   │   └── lmco_assistant_tool.py  # RIO Assistant bridge (LM AI Factory)
+│   │   └── external_assistant_tool.py  # External Assistant bridge (External platform)
 │   │
 │   ├── state/
 │   │   ├── models.py         # 15+ Pydantic domain models
@@ -199,7 +199,7 @@ Copy `.env.example` to `.env`. You only need to set the keys relevant to your LL
 | `LLM_MODEL` | `anthropic/claude-3-haiku-20240307` | LiteLLM model string. Format: `provider/model-name` |
 | `LLM_API_BASE` | _(none)_ | Custom base URL for OpenAI-compatible endpoints |
 | `LLM_API_KEY` | _(none)_ | API key override. Falls back to provider-specific keys below |
-| `LLM_SSL_VERIFY` | `true` | Set to `false` for corporate self-signed certs |
+| `LLM_SSL_VERIFY` | `true` | Set to `false` for self-signed certs |
 
 **Common LLM_MODEL values:**
 ```bash
@@ -207,7 +207,7 @@ LLM_MODEL=anthropic/claude-3-haiku-20240307   # Anthropic (cheapest/fastest)
 LLM_MODEL=anthropic/claude-3-5-sonnet-latest  # Anthropic (best quality)
 LLM_MODEL=openai/gpt-4o                        # OpenAI
 LLM_MODEL=openai/gpt-4o-mini                   # OpenAI (cheaper)
-LLM_MODEL=openai/gpt-oss-120b                  # LM AI Factory custom model
+LLM_MODEL=openai/gpt-oss-120b                  # Custom model on OpenAI-compatible endpoint
 ```
 
 ### Provider API Keys
@@ -215,29 +215,19 @@ LLM_MODEL=openai/gpt-oss-120b                  # LM AI Factory custom model
 | Variable | Description |
 |----------|-------------|
 | `ANTHROPIC_API_KEY` | Required when using any `anthropic/*` model |
-| `OPENAI_API_KEY` | Required when using any `openai/*` model (or as LMCO fallback) |
+| `OPENAI_API_KEY` | Required when using any `openai/*` model |
 
-### LM AI Factory — RIO Assistant Integration
+### External External Assistant Integration
 
-These power the `call_rio_assistant` tool in the `risk_agent`. Defaults are pre-configured for the RMS EPT sandbox.
+These power the `call_external_assistant` tool in the `risk_agent`. See `.env.example` for the full list of `LMCO_*` variables and their descriptions.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LMCO_API_KEY` | _(falls back to `OPENAI_API_KEY`)_ | Bearer token for LM AI Factory |
-| `LMCO_API_BASE` | `https://api.ai.us.lmco.com/v1` | LM AI Factory base URL |
-| `LMCO_ORG` | `RMS EPT Assistant Sandbox` | OpenAI-Organization header value |
-| `LMCO_RIO_ASSISTANT_ID` | `70a49d3b-5cfb-43ef-994e-b558433b483f` | RIO Assistant's ID in the Assistants API |
-| `LMCO_SSL_VERIFY` | `false` | SSL verification (disable for corporate certs) |
-| `LMCO_POLL_INTERVAL` | `2` | Seconds between run-status polls |
-| `LMCO_POLL_TIMEOUT` | `120` | Max seconds to wait for a run to complete |
+### Using an external OpenAI-compatible endpoint as the orchestrator LLM
 
-### Using the LM AI Factory as the orchestrator LLM
-
-To route all agent LLM calls through LM AI Factory chat completions:
+To route all agent LLM calls through an external chat completions endpoint:
 ```bash
 LLM_MODEL=openai/gpt-4o
-LLM_API_BASE=https://api.ai.us.lmco.com/v1
-LLM_API_KEY=<your-jwt-bearer-token>
+LLM_API_BASE=https://your-endpoint/v1
+LLM_API_KEY=<your-bearer-token>
 LLM_SSL_VERIFY=false
 ```
 
@@ -271,7 +261,7 @@ User (adk web or demo script)
    ┌──────────┐   ┌──────────────┐   ┌──────────────┐
    │ cam_agent │   │  rca_agent   │   │  risk_agent  │
    │ EVM/cost  │   │ Root cause   │   │ Risk 5x5     │
-   │ variance  │   │ 5W/8D/Fish   │   │ + RIO tool   │
+   │ variance  │   │ 5W/8D/Fish   │   │ + Risk tool   │
    └──────────┘   └──────────────┘   └──────────────┘
          ▼               ▼                   ▼
    ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
@@ -284,14 +274,14 @@ User (adk web or demo script)
 ┌──────────────────────────────────────────────────────────────┐
 │                      Tool Registry                           │
 │  src/tools/tool_registry.py                                  │
-│  24 tools (10 data + 8 analysis + 6 artifact + call_rio)     │
+│  24 tools (10 data + 8 analysis + 6 artifact + call_ext_assistant)     │
 │  Each agent gets only its permitted subset                   │
 └──────────────────────────────────────────────────────────────┘
          │
          ├── read_* tools → src/mock_data/ (simulated program)
          ├── calculate_* / assess_* tools → inline Python logic
          ├── write_* tools → outputs/ directory (Markdown files)
-         └── call_rio_assistant → LM AI Factory Assistants API
+         └── call_external_assistant → External Assistants API
 ```
 
 **ADK Web UI mode** (simpler — used most often):
@@ -311,10 +301,10 @@ model = get_model()   # Returns LiteLlm instance from env vars
 
 All agents call `get_model()` — changing your `.env` switches the LLM for every agent with no code changes.
 
-**To use a custom OpenAI-compatible endpoint** (e.g., LM AI Factory):
+**To use a custom OpenAI-compatible endpoint:**
 ```bash
 LLM_MODEL=openai/gpt-4o
-LLM_API_BASE=https://api.ai.us.lmco.com/v1
+LLM_API_BASE=https://your-endpoint/v1
 LLM_API_KEY=<bearer-token>
 LLM_SSL_VERIFY=false
 ```
@@ -376,7 +366,7 @@ All agents use `get_model()` and pull their tools from `ToolRegistry`.
 
 ### 7.4 Risk Agent (`risk_agent`)
 **File:** `src/agents/risk_agent.py`
-**Role:** Risk management using the 5x5 probability × impact matrix. **Has the RIO Assistant integration.**
+**Role:** Risk management using the 5x5 probability × impact matrix. **Has the External Assistant integration.**
 
 **Risk Score Thresholds:**
 | Score | Color | Action |
@@ -388,12 +378,12 @@ All agents use `get_model()` and pull their tools from `ToolRegistry`.
 
 **Risk Categories:** Technical, Schedule, Cost, Supply Chain, Requirements, External
 
-**Tools:** `read_risk_register`, `read_evm_metrics`, `read_supplier_metrics`, `calculate_risk_exposure`, `assess_supplier_risk`, `write_risk_register_update`, **`call_rio_assistant`**
+**Tools:** `read_risk_register`, `read_evm_metrics`, `read_supplier_metrics`, `calculate_risk_exposure`, `assess_supplier_risk`, `write_risk_register_update`, **`call_external_assistant`**
 
-**RIO Assistant workflow (built into system prompt):**
+**External Assistant workflow (built into system prompt):**
 1. Call data tools to gather program state
 2. Compose query with context (CPI, SPI, risk IDs, etc.)
-3. Call `call_rio_assistant(query)` → get RIO domain expert analysis
+3. Call `call_external_assistant(query)` → get Risk domain expert analysis
 4. Incorporate response into final assessment
 5. Call `write_risk_register_update` to document
 
@@ -451,7 +441,7 @@ rca_agent:        read_evm_metrics, read_ims_milestones, read_supplier_metrics,
 
 risk_agent:       read_risk_register, read_evm_metrics, read_supplier_metrics,
                   calculate_risk_exposure, assess_supplier_risk,
-                  write_risk_register_update, call_rio_assistant
+                  write_risk_register_update, call_external_assistant
 
 contracts_agent:  read_contract_baseline, read_contract_mods, read_cdrl_list,
                   assess_contract_mod_impact, write_contract_change_summary
@@ -514,38 +504,36 @@ All write Markdown files to `outputs/` and return `{"filepath": "...", "content"
 
 ---
 
-### 8.4 External Tool — RIO Assistant (`src/tools/lmco_assistant_tool.py`)
+### 8.4 External Tool — External Assistant (`src/tools/external_assistant_tool.py`)
 
 See Section 9 for full details.
 
 | Function | Parameters | Returns |
 |----------|-----------|---------|
-| `call_rio_assistant(query)` | `query: str` — risk scenario or question with context | `{status, response, assistant, thread_id}` or `{status, error}` |
+| `call_external_assistant(query)` | `query: str` — risk scenario or question with context | `{status, response, assistant, thread_id}` or `{status, error}` |
 
 ---
 
-## 9. LM AI Factory Integration (RIO Assistant)
+## 9. External Assistant Integration (External Assistant)
 
 ### What it is
 
-The `call_rio_assistant` tool bridges the ADK `risk_agent` to a pre-built OpenAI Assistant on the company's internal LM AI Factory platform. The RIO (Risk, Issue, Opportunity) Assistant has:
-- Custom system instructions for LM RIO management
+The `call_external_assistant` tool bridges the ADK `risk_agent` to a pre-built OpenAI Assistant hosted on an external platform. The Risk (Risk, Issue, Opportunity) Assistant has:
+- Custom system instructions for Risk management
 - A vector store with reference documents
-- A specific assistant ID: `70a49d3b-5cfb-43ef-994e-b558433b483f`
 
 ### Why it's a tool (not the LLM)
 
-ADK uses the chat completions API format for its LLM calls. The RIO Assistant uses the OpenAI **Assistants API** — a different protocol involving threads, runs, polling, and message retrieval. Wrapping it as a tool is the clean integration point: the risk_agent's "brain" (any LLM) orchestrates tool calls, and delegates RIO-specific analysis to this tool.
+ADK uses the chat completions API format for its LLM calls. The External Assistant uses the OpenAI **Assistants API** — a different protocol involving threads, runs, polling, and message retrieval. Wrapping it as a tool is the clean integration point: the risk_agent's "brain" (any LLM) orchestrates tool calls, and delegates Risk-specific analysis to this tool.
 
-### How it works (source: `src/tools/lmco_assistant_tool.py`)
+### How it works (source: `src/tools/external_assistant_tool.py`)
 
 ```python
-def call_rio_assistant(query: str) -> dict:
+def call_external_assistant(query: str) -> dict:
     # 1. POST /v1/threads/runs
     #    Body: {assistant_id, thread: {messages: [{role:user, content:query}]}}
     #    Headers: Authorization: Bearer <token>
     #             OpenAI-Beta: assistants=v2
-    #             OpenAI-Organization: RMS EPT Assistant Sandbox
 
     # 2. Poll GET /v1/threads/{thread_id}/runs/{run_id}
     #    Until status in {completed, failed, cancelled, expired}
@@ -558,38 +546,30 @@ def call_rio_assistant(query: str) -> dict:
 
 ### Configuration (`.env`)
 
-```bash
-LMCO_API_KEY=<your-jwt-bearer-token>      # Required
-LMCO_API_BASE=https://api.ai.us.lmco.com/v1  # default
-LMCO_ORG=RMS EPT Assistant Sandbox           # default
-LMCO_RIO_ASSISTANT_ID=70a49d3b-5cfb-43ef-994e-b558433b483f  # default
-LMCO_SSL_VERIFY=false                         # default (corp certs)
-```
+All configuration is via environment variables. See `.env.example` for the full list of `LMCO_*` variables. The key ones:
+- `LMCO_API_KEY` — Bearer token (required)
+- `LMCO_API_BASE` — Assistants API base URL (required)
+- `LMCO_Risk_ASSISTANT_ID` — Assistant ID (required)
 
-### Adding a new LM AI Factory assistant
+### Adding a new external assistant
 
 To add a second assistant (e.g., the CAM Assistant):
 
-1. Add a new function to `src/tools/lmco_assistant_tool.py`:
+1. Add a new function to `src/tools/external_assistant_tool.py`:
 ```python
 def call_cam_assistant(query: str) -> dict:
     """Query the CAM Assistant for EVM guidance."""
-    # Same pattern, different assistant ID in config
     cfg = _get_config()
-    cfg["assistant_id"] = os.getenv("LMCO_CAM_ASSISTANT_ID", "<cam-assistant-id>")
-    # ... rest of implementation (identical to call_rio_assistant)
+    cfg["assistant_id"] = os.getenv("LMCO_CAM_ASSISTANT_ID", "")
+    # ... rest of implementation (identical to call_external_assistant)
 ```
 
 2. Register in `tool_registry.py`:
 ```python
-from src.tools.lmco_assistant_tool import call_rio_assistant, call_cam_assistant
-# Add to cam_agent list
+from src.tools.external_assistant_tool import call_external_assistant, call_cam_assistant
 ```
 
-3. Add env var to `.env.example`:
-```bash
-# LMCO_CAM_ASSISTANT_ID=<cam-id>
-```
+3. Add env var to `.env.example`
 
 ---
 
@@ -648,7 +628,7 @@ history = manager.get_state_history()      # [(version, timestamp, status), ...]
 
 ## 12. Mock Data — The Simulated Program
 
-All data represents the **Advanced Fighter Program (AFP)** — a fictional but realistic defense program with deliberate problems for demo/testing purposes.
+All data represents the **Advanced Fighter Program (AFP)** — a fictional but realistic program with deliberate problems for demo/testing purposes.
 
 ### Program Health at a Glance
 
@@ -877,9 +857,9 @@ from src.tools.my_tools import my_new_tool
 _AGENT_TOOL_MAP["risk_agent"].append(my_new_tool)
 ```
 
-### Add a new LM AI Factory assistant tool
+### Add a new external assistant tool
 
-See Section 9. Pattern: copy `call_rio_assistant`, change the assistant ID env var, add to registry.
+See Section 9. Pattern: copy `call_external_assistant`, change the assistant ID env var, add to registry.
 
 ### Connect real data
 
@@ -904,17 +884,17 @@ pip install google-adk>=1.15.0
 pip install -e .
 ```
 
-### `call_rio_assistant` returns `{"status": "error", "error": "No API key found"}`
-Set `LMCO_API_KEY` (or `OPENAI_API_KEY`) in your `.env` file. This is your LM AI Factory JWT bearer token.
+### `call_external_assistant` returns `{"status": "error", "error": "No API key found"}`
+Set the required `LMCO_*` env vars in your `.env` file. See `.env.example` for the full list.
 
-### `call_rio_assistant` returns SSL errors
-`LMCO_SSL_VERIFY=false` is the default. If you're still getting SSL errors, verify `urllib3` is installed and the default is correctly parsed — check `_get_config()` returns `ssl_verify=False`.
+### `call_external_assistant` returns SSL errors
+Set `LMCO_SSL_VERIFY=false` in your `.env`. If you're still getting SSL errors, verify `urllib3` is installed and `_get_config()` returns `ssl_verify=False`.
 
-### `call_rio_assistant` times out
-The RIO Assistant can take 10–30 seconds. `LMCO_POLL_TIMEOUT=120` (default) should cover this. If the corporate network is slow, increase to `180`.
+### `call_external_assistant` times out
+The External Assistant can take 10–30 seconds. Increase `LMCO_POLL_TIMEOUT` if the network is slow.
 
 ### LiteLlm `AuthenticationError`
-Check your API key env var. For Anthropic: `ANTHROPIC_API_KEY`. For LM AI Factory: `LLM_API_KEY` or `LMC_API_KEY`.
+Check your API key env var. For Anthropic: `ANTHROPIC_API_KEY`. For OpenAI-compatible endpoints: `LLM_API_KEY`.
 
 ### `adk web` shows no agents
 Each agent directory needs both `__init__.py` (containing `from . import agent`) and `agent.py` (defining `root_agent`). Check both files exist and `root_agent` is defined at module level (not inside a function).
@@ -964,4 +944,4 @@ Data tools return deep copies of mock data. Analysis tools compute from those co
 
 ---
 
-*Last updated: 2026-03-05 | Covers RIO Assistant integration commit 23fac21*
+*Last updated: 2026-03-05 | Covers External Assistant integration commit 23fac21*

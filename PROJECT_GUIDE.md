@@ -35,7 +35,7 @@
 
 ## 1. What This Project Is
 
-This is a **multi-agent AI system** for defense program management analysis, built on
+This is a **multi-agent AI system** for program management analysis, built on
 **Google Agent Development Kit (ADK)**. It simulates a "Program Execution Workbench" where
 6 specialist AI agents collaborate to analyze earned value metrics, investigate quality
 issues, assess risks, interpret contracts, and produce executive leadership briefs.
@@ -83,7 +83,7 @@ This function reads four environment variables:
 | `LLM_MODEL` | `anthropic/claude-3-haiku-20240307` | LiteLLM model string (format: `provider/model-name`) |
 | `LLM_API_BASE` | *(not set)* | Custom API base URL for internal/self-hosted endpoints |
 | `LLM_API_KEY` | *(not set)* | API key override (if not set, LiteLLM uses provider-specific env vars like `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`) |
-| `LLM_SSL_VERIFY` | `true` | Set to `false` to disable SSL verification for corporate endpoints with self-signed certificates |
+| `LLM_SSL_VERIFY` | `true` | Set to `false` to disable SSL verification for internal endpoints with self-signed certificates |
 
 It returns a `LiteLlm` instance with these parameters passed as kwargs. The kwargs flow
 directly through to `litellm.acompletion()` — this is confirmed by reading the ADK source
@@ -146,10 +146,10 @@ LLM_MODEL=openai/gpt-4o
 LLM_API_KEY=sk-...
 ```
 
-**Internal OpenAI-compatible endpoint (e.g., corporate LLM gateway):**
+**Internal OpenAI-compatible endpoint (e.g., internal LLM gateway):**
 ```bash
 LLM_MODEL=openai/llama-3.3-70b-instruct
-LLM_API_BASE=https://api.ai.us.lmco.com/v1
+LLM_API_BASE=https://api.example.com/v1
 LLM_API_KEY=your-internal-api-key
 LLM_SSL_VERIFY=false
 ```
@@ -375,8 +375,8 @@ When `LLM_API_KEY` is NOT set, LiteLLM falls back to provider-specific env vars:
 
 ### SSL Verification
 
-Corporate endpoints often use self-signed certificates. Setting `LLM_SSL_VERIFY=false`
-passes `ssl_verify=False` to LiteLLM. Alternatively, you can install your corporate CA
+Internal endpoints often use self-signed certificates. Setting `LLM_SSL_VERIFY=false`
+passes `ssl_verify=False` to LiteLLM. Alternatively, you can install your internal CA
 certificate and set the `SSL_CERT_FILE` or `REQUESTS_CA_BUNDLE` environment variable
 to point to it, which avoids disabling verification entirely.
 
@@ -767,7 +767,7 @@ Wraps ADK's `InMemoryMemoryService`. Pre-seeded with **15 program history facts*
 
 TF-IDF keyword search without ML dependencies. Pre-populated with **20 contextual memories**
 covering similar variance situations, contract precedents, supplier patterns, and quality
-escape root causes from other defense programs.
+escape root causes from other programs.
 
 ```python
 retriever = MemoryRetriever()
@@ -945,7 +945,7 @@ pytest-asyncio>=0.21.0       # Async test support
 
 **Problem: SSL certificate verification error**
 - Set `LLM_SSL_VERIFY=false` in your `.env`
-- Or install your corporate CA cert and set `SSL_CERT_FILE=/path/to/ca-bundle.crt`
+- Or install your internal CA cert and set `SSL_CERT_FILE=/path/to/ca-bundle.crt`
 
 **Problem: "Model not found" or "Invalid model"**
 - Verify the model string format: `provider/model-name`

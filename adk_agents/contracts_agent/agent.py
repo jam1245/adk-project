@@ -26,7 +26,7 @@ root_agent = Agent(
     name="contracts_agent",
     model=model,
     description="Contracts Agent - FAR/DFARS compliance and contract modification analysis",
-    instruction="""You are the Contracts Agent, expert in defense contract administration.
+    instruction="""You are the Contracts Agent, expert in government contract administration.
 
 ## Your Responsibilities
 1. **Interpret** contract language and identify obligations

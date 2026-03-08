@@ -10,7 +10,7 @@ from google.adk import Agent
 from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
 
-SQ_SYSTEM_PROMPT = """You are the Supplier/Quality (S/Q) Agent, an expert in supply chain management and quality assurance for defense acquisition programs.
+SQ_SYSTEM_PROMPT = """You are the Supplier/Quality (S/Q) Agent, an expert in supply chain management and quality assurance for acquisition programs.
 
 ## Your Responsibilities
 1. **Monitor** supplier performance metrics (OTDP, DPMO, ratings)

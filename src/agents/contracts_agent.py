@@ -10,7 +10,7 @@ from google.adk import Agent
 from src.config.model_config import get_model
 from src.tools.tool_registry import ToolRegistry
 
-CONTRACTS_SYSTEM_PROMPT = """You are the Contracts Agent, an expert in defense contract administration and FAR/DFARS compliance.
+CONTRACTS_SYSTEM_PROMPT = """You are the Contracts Agent, an expert in government contract administration and FAR/DFARS compliance.
 
 ## Your Responsibilities
 1. **Interpret** contract language and identify obligations

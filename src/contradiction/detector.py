@@ -3,7 +3,7 @@ Contradiction detection logic for the Program Execution Workbench.
 
 Implements a rule-based engine that examines agent outputs to identify
 conflicting assessments across specialist agents. Seven detection rules
-cover the most common contradiction patterns in defense program analysis:
+cover the most common contradiction patterns in program analysis:
 
 1. CPI/SPI direction disagreement
 2. Risk assessment severity conflict

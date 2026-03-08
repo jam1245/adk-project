@@ -13,12 +13,12 @@ LLM_MODEL : str
     - "openai/llama-3.3-70b-instruct" (for OpenAI-compatible endpoints)
 LLM_API_BASE : str, optional
     Custom API base URL for OpenAI-compatible endpoints.
-    Example: "https://api.ai.us.lmco.com/v1"
+    Example: "https://api.example.com/v1"
 LLM_API_KEY : str, optional
     API key override. If not set, LiteLLM falls back to provider-specific
     env vars (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.).
 LLM_SSL_VERIFY : str, optional
-    Set to "false" to disable SSL verification (for corporate endpoints
+    Set to "false" to disable SSL verification (for internal endpoints
     with self-signed certs). Defaults to "true".
 """
 
