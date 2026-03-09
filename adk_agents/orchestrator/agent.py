@@ -1,8 +1,10 @@
 """
-Orchestrator Agent for ADK Web UI.
+Orchestrator Agent for ADK Web UI (refactored).
 
-This module exposes the full Program Execution Workbench as a single agent
-that can coordinate analysis across all specialist agents.
+Routes program management requests to the appropriate
+specialist sub-agent using ADK's native sub_agents delegation pattern.
+Sub-agents take full control of their domain; the orchestrator never answers
+directly from its own knowledge.
 """
 
 import sys
@@ -12,64 +14,35 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from google.adk import Agent
+from google.adk.agents import LlmAgent
 
-from src.config.model_config import get_model
-from src.tools.tool_registry import ToolRegistry
+# Import all four sub-agents
+from adk_agents.pm_agent.agent import pm_agent
+from adk_agents.risk_agent.agent import risk_agent
+from adk_agents.rcca_agent.agent import rcca_agent
+from adk_agents.cam_agent.agent import cam_agent
 
-# Initialize registry and get ALL tools for the orchestrator
-registry = ToolRegistry()
-all_tools = registry.get_all_tools()
-model = get_model()
-
-root_agent = Agent(
+# IMPORTANT: sub_agents — NOT tools. This is native ADK agent handoff, not tool-calling.
+orchestrator = LlmAgent(
     name="orchestrator",
-    model=model,
-    description="Program Execution Workbench - Full multi-agent orchestration for program analysis",
-    instruction="""You are the Program Execution Workbench Orchestrator, coordinating comprehensive analysis of acquisition programs.
+    model="claude-sonnet-4-20250514",
+    description="Program Execution Workbench orchestrator. Routes program management requests to the appropriate specialist sub-agent.",
+    instruction="""You are the Program Execution Workbench orchestrator, a multi-agent system for program management.
 
-## Your Role
-You have access to ALL tools from all specialist agents. You can perform the work of:
-- **CAM Agent**: EVM analysis, variance drivers, EAC projections
-- **RCA Agent**: Root cause analysis using 5 Whys, Fishbone, 8D
-- **Risk Agent**: Risk assessment using 5x5 matrix
-- **Contracts Agent**: Contract interpretation, FAR/DFARS compliance
-- **S/Q Agent**: Supplier performance, quality escape investigation
-- **PM Agent**: Executive synthesis, leadership briefs
+Your ONLY job is to route incoming requests to the correct specialist sub-agent.
 
-## Analysis Workflow
-When given a request, follow this workflow:
+Do NOT answer questions directly from your own knowledge. Always delegate.
 
-1. **Triage**: Classify the intent (variance explanation, contract change, quality escape, risk assessment, schedule analysis)
+Routing guide:
+- pm_agent:   leadership briefs, executive summaries, schedule status, milestones, program health, what/why/so-what
+- risk_agent: risk identification, mitigation, risk register, risk exposure, probability/impact, 5x5 matrix
+- rcca_agent: root cause analysis, corrective actions, 5 Whys, Fishbone, 8D problem-solving, systemic issues
+- cam_agent:  EVM metrics, CPI, SPI, cost variance, EAC, budget performance, earned value
 
-2. **Gather Data**: Use the appropriate read tools to gather relevant data:
-   - EVM metrics and history
-   - IMS milestones and critical path
-   - Risk register
-   - Contract baseline and modifications
-   - Supplier metrics and quality escapes
-
-3. **Analyze**: Apply the appropriate analysis:
-   - Calculate EAC, variance drivers, trends
-   - Assess risks and exposure
-   - Evaluate contract impacts
-   - Investigate quality issues
-
-4. **Synthesize**: Combine findings into a coherent narrative using the What/Why/So What/Now What framework
-
-5. **Generate Artifacts**: Create formal outputs (leadership briefs, 8D reports, risk updates, etc.)
-
-## Available Tools
-You have access to ALL 24 tools including:
-- Data tools: read_program_snapshot, read_evm_metrics, read_risk_register, etc.
-- Analysis tools: calculate_eac, calculate_risk_exposure, assess_supplier_risk, etc.
-- Artifact tools: write_leadership_brief, write_eight_d_report, write_risk_register_update, etc.
-
-## Key Principles
-- Always cite evidence from the data
-- Quantify impacts (dollars, days, percentages)
-- Distinguish facts from interpretations
-- Provide actionable recommendations
-""",
-    tools=all_tools,
+Transfer control to the appropriate sub-agent and let them handle the full response.
+If a request spans multiple domains, route to the most relevant primary specialist first.""",
+    sub_agents=[pm_agent, risk_agent, rcca_agent, cam_agent]
+    # ^^^ sub_agents, NOT tools. This is the critical line.
 )
+
+root_agent = orchestrator  # Required for ADK web UI discovery

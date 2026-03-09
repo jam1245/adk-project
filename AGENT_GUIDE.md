@@ -219,7 +219,7 @@ LLM_MODEL=openai/gpt-oss-120b                  # Custom model on OpenAI-compatib
 
 ### External External Assistant Integration
 
-These power the `call_external_assistant` tool in the `risk_agent`. See `.env.example` for the full list of `LMCO_*` variables and their descriptions.
+These power the `call_external_assistant` tool used by all four sub-agents (pm_agent, risk_agent, rcca_agent, cam_agent). See `.env.example` for the full list of `LM_PLATFORM_* and *_ASSISTANT_ID` variables and their descriptions.
 
 ### Using an external OpenAI-compatible endpoint as the orchestrator LLM
 
@@ -504,21 +504,21 @@ All write Markdown files to `outputs/` and return `{"filepath": "...", "content"
 
 ---
 
-### 8.4 External Tool — External Assistant (`src/tools/external_assistant_tool.py`)
+### 8.4 External Tool — LM Platform Bridge (`src/tools/external_assistant_tool.py`)
 
 See Section 9 for full details.
 
 | Function | Parameters | Returns |
 |----------|-----------|---------|
-| `call_external_assistant(query)` | `query: str` — risk scenario or question with context | `{status, response, assistant, thread_id}` or `{status, error}` |
+| `call_external_assistant(query, assistant_id)` | `query: str`, `assistant_id: str` — risk scenario or question with context | `{status, response, assistant, thread_id}` or `{status, error}` |
 
 ---
 
-## 9. External Assistant Integration (External Assistant)
+## 9. External Assistant Integration (LM Platform)
 
 ### What it is
 
-The `call_external_assistant` tool bridges the ADK `risk_agent` to a pre-built OpenAI Assistant hosted on an external platform. The Risk (Risk, Issue, Opportunity) Assistant has:
+The `call_external_assistant(query, assistant_id)` function bridges all four sub-agents to pre-built assistants hosted on an external platform. The Risk (Risk, Issue, Opportunity) Assistant has:
 - Custom system instructions for Risk management
 - A vector store with reference documents
 
@@ -546,21 +546,21 @@ def call_external_assistant(query: str) -> dict:
 
 ### Configuration (`.env`)
 
-All configuration is via environment variables. See `.env.example` for the full list of `LMCO_*` variables. The key ones:
-- `LMCO_API_KEY` — Bearer token (required)
-- `LMCO_API_BASE` — Assistants API base URL (required)
-- `LMCO_Risk_ASSISTANT_ID` — Assistant ID (required)
+All configuration is via environment variables. See `.env.example` for the full list of `LM_PLATFORM_* and *_ASSISTANT_ID` variables. The key ones:
+- `LM_PLATFORM_API_KEY` — Bearer token (required)
+- `LM_PLATFORM_BASE_URL` — Assistants API base URL (required)
+- `RISK_ASSISTANT_ID` — Assistant ID (required)
 
 ### Adding a new external assistant
 
-To add a second assistant (e.g., the CAM Assistant):
+All four assistants already exist. To add a new one (e.g., a contracts assistant):
 
 1. Add a new function to `src/tools/external_assistant_tool.py`:
 ```python
 def call_cam_assistant(query: str) -> dict:
     """Query the CAM Assistant for EVM guidance."""
     cfg = _get_config()
-    cfg["assistant_id"] = os.getenv("LMCO_CAM_ASSISTANT_ID", "")
+    cfg["assistant_id"] = os.getenv("CAM_ASSISTANT_ID", "")
     # ... rest of implementation (identical to call_external_assistant)
 ```
 
@@ -885,19 +885,19 @@ pip install -e .
 ```
 
 ### `call_external_assistant` returns `{"status": "error", "error": "No API key found"}`
-Set the required `LMCO_*` env vars in your `.env` file. See `.env.example` for the full list.
+Set the required `LM_PLATFORM_* and *_ASSISTANT_ID` env vars in your `.env` file. See `.env.example` for the full list.
 
 ### `call_external_assistant` returns SSL errors
-Set `LMCO_SSL_VERIFY=false` in your `.env`. If you're still getting SSL errors, verify `urllib3` is installed and `_get_config()` returns `ssl_verify=False`.
+Set `EXT_ASSISTANT_SSL_VERIFY=false` in your `.env`. If you're still getting SSL errors, verify `urllib3` is installed and `_get_config()` returns `ssl_verify=False`.
 
 ### `call_external_assistant` times out
-The External Assistant can take 10–30 seconds. Increase `LMCO_POLL_TIMEOUT` if the network is slow.
+The External Assistant can take 10–30 seconds. Increase `EXT_ASSISTANT_POLL_TIMEOUT` if the network is slow.
 
 ### LiteLlm `AuthenticationError`
 Check your API key env var. For Anthropic: `ANTHROPIC_API_KEY`. For OpenAI-compatible endpoints: `LLM_API_KEY`.
 
 ### `adk web` shows no agents
-Each agent directory needs both `__init__.py` (containing `from . import agent`) and `agent.py` (defining `root_agent`). Check both files exist and `root_agent` is defined at module level (not inside a function).
+Active agents: orchestrator, pm_agent, risk_agent, rcca_agent, cam_agent. Each needs `__init__.py` and `agent.py` with `root_agent` at module level. The legacy contracts_agent, sq_agent, rca_agent have been removed.
 
 ### Tool not being called by agent
 1. Check the tool is in `_AGENT_TOOL_MAP` for that agent in `tool_registry.py`
@@ -944,4 +944,4 @@ Data tools return deep copies of mock data. Analysis tools compute from those co
 
 ---
 
-*Last updated: 2026-03-05 | Covers External Assistant integration commit 23fac21*
+*Last updated: 2026-03-09 | sub_agents refactor: orchestrator + pm/risk/rcca/cam agents with LM platform integration*

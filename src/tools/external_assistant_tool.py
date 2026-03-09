@@ -29,10 +29,17 @@ def _get_config() -> Dict[str, Any]:
     """Read assistant configuration from environment variables."""
     ssl_raw = os.getenv("EXT_ASSISTANT_SSL_VERIFY", "false").lower()
     return {
-        "api_key":       os.getenv("EXT_ASSISTANT_API_KEY") or os.getenv("OPENAI_API_KEY", ""),
-        "api_base":      os.getenv("EXT_ASSISTANT_API_BASE", "").rstrip("/"),
+        # Support both LM_PLATFORM_* (new) and EXT_ASSISTANT_* (legacy) names
+        "api_key":       (
+            os.getenv("LM_PLATFORM_API_KEY")
+            or os.getenv("EXT_ASSISTANT_API_KEY")
+            or os.getenv("OPENAI_API_KEY", "")
+        ),
+        "api_base":      (
+            os.getenv("LM_PLATFORM_BASE_URL")
+            or os.getenv("EXT_ASSISTANT_API_BASE", "")
+        ).rstrip("/"),
         "org":           os.getenv("EXT_ASSISTANT_ORG", ""),
-        "assistant_id":  os.getenv("EXT_ASSISTANT_ID", ""),
         # ssl_verify=True means "do verify"; "false" string disables it
         "ssl_verify":    ssl_raw not in ("false", "0", "no"),
         "poll_interval": float(os.getenv("EXT_ASSISTANT_POLL_INTERVAL", "2")),
@@ -56,31 +63,17 @@ def _build_headers(cfg: Dict[str, Any]) -> Dict[str, str]:
 # Public tool function
 # ---------------------------------------------------------------------------
 
-def call_external_assistant(query: str) -> dict:
-    """Query the external Risk Assistant for expert risk analysis.
+def call_external_assistant(query: str, assistant_id: str) -> dict:
+    """Call an external LM platform assistant with a query.
 
     Sends a query to a pre-built assistant hosted on an external
-    platform.  The assistant has purpose-built system instructions and a
-    vector store for risk management guidance.
-
-    Use this tool whenever the conversation involves:
-    - Risk identification or scoring against the 5x5 matrix
-    - Issue tracking and escalation criteria
-    - Opportunity identification and capture planning
-    - Mitigation or contingency plan development
-    - Risk-domain questions that go beyond the local data tools
-
-    Recommended workflow:
-    1. Call ``read_risk_register`` and other data tools to gather program state.
-    2. Summarise the relevant context into a concise ``query`` string.
-    3. Call this tool — the assistant will reason over the query and return
-       its analysis.
-    4. Incorporate the response into your final risk assessment or register update.
+    platform (OpenAI-compatible Assistants API).
 
     Args:
-        query: The risk management question, scenario, or program data to analyse.
-               Include relevant context (CPI/SPI values, milestone status, risk IDs,
-               supplier concerns) so the assistant can provide a targeted response.
+        query: The user's question or request to send to the assistant.
+               Include relevant context so the assistant can provide a
+               targeted response.
+        assistant_id: The ID of the specific assistant on the LM platform.
 
     Returns:
         dict with the following keys:
@@ -101,7 +94,7 @@ def call_external_assistant(query: str) -> dict:
         return {
             "status": "error",
             "error":  (
-                "No API key found.  Set EXT_ASSISTANT_API_KEY (or OPENAI_API_KEY) "
+                "No API key found.  Set LM_PLATFORM_API_KEY (or EXT_ASSISTANT_API_KEY) "
                 "in your .env file."
             ),
         }
@@ -109,13 +102,13 @@ def call_external_assistant(query: str) -> dict:
     if not cfg["api_base"]:
         return {
             "status": "error",
-            "error":  "No API base URL configured.  Set EXT_ASSISTANT_API_BASE in your .env file.",
+            "error":  "No API base URL configured.  Set LM_PLATFORM_BASE_URL in your .env file.",
         }
 
-    if not cfg["assistant_id"]:
+    if not assistant_id:
         return {
             "status": "error",
-            "error":  "No assistant ID configured.  Set EXT_ASSISTANT_ID in your .env file.",
+            "error":  "No assistant ID provided.",
         }
 
     headers    = _build_headers(cfg)
@@ -125,7 +118,7 @@ def call_external_assistant(query: str) -> dict:
     try:
         # -- Step 1: Create a thread and start a run in one request ----------
         payload = {
-            "assistant_id": cfg["assistant_id"],
+            "assistant_id": assistant_id,
             "thread": {
                 "messages": [{"role": "user", "content": query}]
             },

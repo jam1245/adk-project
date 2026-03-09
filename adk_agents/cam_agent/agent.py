@@ -1,8 +1,9 @@
 """
-CAM Agent for ADK Web UI.
+CAM Agent for ADK Web UI (refactored).
 
-This module exposes the CAM (Control Account Manager) Agent for use with `adk web`.
-The CAM Agent is the EVM expert responsible for analyzing earned value metrics.
+Routes EVM and cost performance queries to the external CAM assistant via
+the LM platform API.  Uses native ADK sub_agents pattern — this agent is a
+peer sub-agent under the orchestrator.
 """
 
 import sys
@@ -12,44 +13,38 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from google.adk import Agent
+import os
+from google.adk.agents import LlmAgent
+from src.tools.external_assistant_tool import call_external_assistant
+from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
 
-from src.config.model_config import get_model
-from src.tools.tool_registry import ToolRegistry
 
-# Initialize registry and get tools
-registry = ToolRegistry()
-tools = registry.get_tools_for_agent("cam_agent")
-model = get_model()
+def call_cam_assistant(query: str) -> str:
+    """Call the CAM Assistant on the internal LM platform with a query."""
+    return call_external_assistant(
+        query=query,
+        assistant_id=os.getenv("CAM_ASSISTANT_ID", "cam-assistant-placeholder")
+    )
 
-root_agent = Agent(
+
+cam_agent = LlmAgent(
     name="cam_agent",
-    model=model,
-    description="Control Account Manager Agent - EVM analysis expert for acquisition programs",
-    instruction="""You are the Control Account Manager (CAM) Agent, an expert in Earned Value Management (EVM).
+    model="claude-sonnet-4-20250514",
+    description=(
+        "Handles EVM and cost performance questions: CPI/SPI analysis, cost variance, "
+        "EAC projections, budget performance, and earned value metrics."
+    ),
+    instruction="""You are the CAM Agent, a specialist in earned value management and cost performance.
 
-## Your Responsibilities
-1. **Analyze** EVM metrics (CPI, SPI, CV, SV, BCWP, BCWS, ACWP)
-2. **Identify** variance drivers at the work package level
-3. **Explain** variances with clear cause-and-effect logic
-4. **Project** Estimates at Completion (EAC) using multiple methods
-5. **Recommend** corrective actions to recover cost/schedule performance
+Your primary job is to call the external CAM assistant using the call_cam_assistant tool.
+Pass the user's full query to it and return its response clearly and directly.
 
-## EAC Calculation Methods
-- **CPI Method**: EAC = BAC / CPI (assumes current efficiency continues)
-- **SPI*CPI Method**: EAC = AC + (BAC - EV) / (CPI × SPI) (schedule-adjusted)
-- **Management Estimate**: Bottom-up reassessment
+Use get_program_context if you need basic program metadata before calling the assistant.
+Use format_output to clean up the response before returning it.
+Use log_agent_action to record significant actions.
 
-## Variance Categories
-- **Rate Variance**: Labor rates different from plan
-- **Efficiency Variance**: More/fewer hours than planned
-- **Schedule Variance**: Work ahead/behind schedule
-- **Scope Variance**: Work content different from baseline
-
-## Available Tools
-You have access to tools for reading EVM metrics, calculating EAC, analyzing trends, and writing CAM narratives.
-
-Always provide quantified impacts with dollar values and percentages.
-""",
-    tools=tools,
+Do not answer from your own knowledge — always call the external CAM assistant.""",
+    tools=[call_cam_assistant, get_program_context, format_output, log_agent_action]
 )
+
+root_agent = cam_agent  # Required for ADK web UI standalone discovery

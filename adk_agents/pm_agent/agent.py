@@ -1,9 +1,9 @@
 """
-PM Agent for ADK Web UI.
+PM Agent for ADK Web UI (refactored).
 
-This module exposes the PM (Program Manager) Agent for use with `adk web`.
-The PM Agent serves as the executive synthesizer, responsible for consolidating
-specialist findings into leadership communications.
+Routes program management queries to the external PM assistant via the
+LM platform API.  Uses native ADK sub_agents pattern — this agent is a
+peer sub-agent under the orchestrator, not a coordinator.
 """
 
 import sys
@@ -13,41 +13,38 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from google.adk import Agent
+import os
+from google.adk.agents import LlmAgent
+from src.tools.external_assistant_tool import call_external_assistant
+from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
 
-from src.config.model_config import get_model
-from src.tools.tool_registry import ToolRegistry
 
-# Initialize registry and get tools
-registry = ToolRegistry()
-tools = registry.get_tools_for_agent("pm_agent")
-model = get_model()
+def call_pm_assistant(query: str) -> str:
+    """Call the PM Assistant on the internal LM platform with a query."""
+    return call_external_assistant(
+        query=query,
+        assistant_id=os.getenv("PM_ASSISTANT_ID", "pm-assistant-placeholder")
+    )
 
-root_agent = Agent(
+
+pm_agent = LlmAgent(
     name="pm_agent",
-    model=model,
-    description="Program Manager Agent - Executive synthesizer for program management",
-    instruction="""You are the Program Manager (PM) Agent for an acquisition program.
+    model="claude-sonnet-4-20250514",
+    description=(
+        "Handles program management questions: leadership briefs, executive summaries, "
+        "schedule status, milestone tracking, program health, and what/why/so-what analysis."
+    ),
+    instruction="""You are the PM Agent, a specialist in program management and executive communication.
 
-Your role is to synthesize information from specialist agents and produce executive-level communications.
+Your primary job is to call the external PM assistant using the call_pm_assistant tool.
+Pass the user's full query to it and return its response clearly and directly.
 
-## Your Responsibilities
-1. **Synthesize** findings from CAM, RCA, Risk, Contracts, and S/Q agents into coherent narratives
-2. **Prioritize** issues based on program impact (cost, schedule, technical performance)
-3. **Communicate** clearly to leadership using the What/Why/So What/Now What framework
-4. **Recommend** actions with clear ownership, timelines, and success criteria
+Use get_program_context if you need basic program metadata before calling the assistant.
+Use format_output to clean up the response before returning it.
+Use log_agent_action to record significant actions.
 
-## Output Structure
-When generating leadership briefs, use this structure:
-- **WHAT HAPPENED**: Factual summary of the situation
-- **WHY IT HAPPENED**: Root cause analysis and contributing factors
-- **SO WHAT**: Impact assessment (cost, schedule, risk, mission)
-- **NOW WHAT**: Recommended actions with owners and timelines
-
-## Available Tools
-You have access to tools for reading program data, EVM metrics, and generating artifacts like leadership briefs, variance narratives, and risk updates.
-
-Always be factual and cite evidence. Never speculate without marking it clearly.
-""",
-    tools=tools,
+Do not answer from your own knowledge — always call the external PM assistant.""",
+    tools=[call_pm_assistant, get_program_context, format_output, log_agent_action]
 )
+
+root_agent = pm_agent  # Required for ADK web UI standalone discovery
