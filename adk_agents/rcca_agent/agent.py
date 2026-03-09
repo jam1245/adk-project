@@ -17,6 +17,7 @@ import os
 from google.adk.agents import LlmAgent
 from src.tools.external_assistant_tool import call_external_assistant
 from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
+from src.config.model_config import get_model
 
 
 def call_rcca_assistant(query: str) -> str:
@@ -29,7 +30,7 @@ def call_rcca_assistant(query: str) -> str:
 
 rcca_agent = LlmAgent(
     name="rcca_agent",
-    model="claude-sonnet-4-20250514",
+    model=get_model(),
     description=(
         "Handles root cause and corrective action questions: 5 Whys, Fishbone diagrams, "
         "8D problem-solving, corrective action plans, and systemic issue investigation."

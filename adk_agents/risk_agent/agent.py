@@ -17,6 +17,7 @@ import os
 from google.adk.agents import LlmAgent
 from src.tools.external_assistant_tool import call_external_assistant
 from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
+from src.config.model_config import get_model
 
 
 def call_risk_assistant(query: str) -> str:
@@ -29,7 +30,7 @@ def call_risk_assistant(query: str) -> str:
 
 risk_agent = LlmAgent(
     name="risk_agent",
-    model="claude-sonnet-4-20250514",
+    model=get_model(),
     description=(
         "Handles risk management questions: risk identification, 5x5 risk matrix, "
         "mitigation planning, risk register updates, and risk exposure calculations."

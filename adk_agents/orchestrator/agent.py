@@ -22,10 +22,13 @@ from adk_agents.risk_agent.agent import risk_agent
 from adk_agents.rcca_agent.agent import rcca_agent
 from adk_agents.cam_agent.agent import cam_agent
 
+# Import centralized model configuration
+from src.config.model_config import get_model
+
 # IMPORTANT: sub_agents — NOT tools. This is native ADK agent handoff, not tool-calling.
 orchestrator = LlmAgent(
     name="orchestrator",
-    model="claude-sonnet-4-20250514",
+    model=get_model(),
     description="Program Execution Workbench orchestrator. Routes program management requests to the appropriate specialist sub-agent.",
     instruction="""You are the Program Execution Workbench orchestrator, a multi-agent system for program management.
 
