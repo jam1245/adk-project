@@ -20,8 +20,12 @@ from src.tools.placeholder_tools import get_program_context, format_output, log_
 from src.config.model_config import get_model
 
 
-def call_pm_assistant(query: str) -> str:
-    """Call the PM Assistant on the internal LM platform with a query."""
+def call_pm_assistant(query: str) -> dict:
+    """Call the PM Assistant on the internal LM platform with a query.
+
+    Returns a dict with 'status' ('completed' or 'error') and either
+    'response' (the assistant's reply) or 'error' (description of failure).
+    """
     return call_external_assistant(
         query=query,
         assistant_id=os.getenv("PM_ASSISTANT_ID", "pm-assistant-placeholder")
@@ -44,7 +48,13 @@ Use get_program_context if you need basic program metadata before calling the as
 Use format_output to clean up the response before returning it.
 Use log_agent_action to record significant actions.
 
-Do not answer from your own knowledge — always call the external PM assistant.""",
+IMPORTANT — error handling:
+- If call_pm_assistant returns a result with status "error", tell the user what went wrong
+  and that the external assistant is temporarily unavailable.
+- Do NOT silently transfer to another agent. You own this request.
+- You may offer to retry the call if the error seems transient (timeout, connection error).
+- Only if the user explicitly asks for a different type of analysis (e.g. risk, EVM)
+  should the request go to a different agent.""",
     tools=[call_pm_assistant, get_program_context, format_output, log_agent_action]
 )
 
