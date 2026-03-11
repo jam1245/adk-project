@@ -15,30 +15,30 @@ sys.path.insert(0, str(project_root))
 
 import os
 from google.adk.agents import LlmAgent
-from src.tools.external_assistant_tool import call_external_assistant
+from src.tools.external_assistant_tool import call_risk_assistant_v2
 from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
 from src.config.model_config import get_model
+from src.tools.genesis_description import fetch_description
 
 
+# Alias retained for backward compatibility – original name now points to the v2 implementation.
 def call_risk_assistant(query: str) -> dict:
-    """Call the Risk Assistant on the internal LM platform with a query.
+    return call_risk_assistant_v2(query)
 
-    Returns a dict with 'status' ('completed' or 'error') and either
-    'response' (the assistant's reply) or 'error' (description of failure).
-    """
-    return call_external_assistant(
-        query=query,
-        assistant_id=os.getenv("RISK_ASSISTANT_ID", "risk-assistant-placeholder")
-    )
 
+# Fallback static description matching the original.
+_RISK_DESCRIPTION_FALLBACK = (
+    "Handles risk management questions: risk identification, 5x5 risk matrix, "
+    "mitigation planning, risk register updates, and risk exposure calculations."
+)
+_RISK_DESCRIPTION = fetch_description(
+    os.getenv("RISK_ASSISTANT_ID"), fallback=_RISK_DESCRIPTION_FALLBACK
+)
 
 risk_agent = LlmAgent(
     name="risk_agent",
     model=get_model(),
-    description=(
-        "Handles risk management questions: risk identification, 5x5 risk matrix, "
-        "mitigation planning, risk register updates, and risk exposure calculations."
-    ),
+    description=_RISK_DESCRIPTION,
     instruction="""You are the Risk Agent, a specialist in program risk management.
 
 Your primary job is to call the external Risk assistant using the call_risk_assistant tool.

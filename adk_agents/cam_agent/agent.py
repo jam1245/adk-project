@@ -15,30 +15,33 @@ sys.path.insert(0, str(project_root))
 
 import os
 from google.adk.agents import LlmAgent
-from src.tools.external_assistant_tool import call_external_assistant
+from src.tools.external_assistant_tool import call_cam_assistant_v2
 from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
 from src.config.model_config import get_model
+# New import to fetch dynamic description from Genesis API
+from src.tools.genesis_description import fetch_description
 
 
+# Alias retained for backward compatibility – original name now points to the v2 implementation.
 def call_cam_assistant(query: str) -> dict:
-    """Call the CAM Assistant on the internal LM platform with a query.
+    return call_cam_assistant_v2(query)
 
-    Returns a dict with 'status' ('completed' or 'error') and either
-    'response' (the assistant's reply) or 'error' (description of failure).
-    """
-    return call_external_assistant(
-        query=query,
-        assistant_id=os.getenv("CAM_ASSISTANT_ID", "cam-assistant-placeholder")
-    )
 
+# Resolve the assistant description at import time.  If the API call fails we fall
+# back to the original static description to ensure the agent can still be
+# instantiated.
+_CAM_DESCRIPTION_FALLBACK = (
+    "Handles EVM and cost performance questions: CPI/SPI analysis, cost variance, "
+    "EAC projections, budget performance, and earned value metrics."
+)
+_CAM_DESCRIPTION = fetch_description(
+    os.getenv("CAM_ASSISTANT_ID"), fallback=_CAM_DESCRIPTION_FALLBACK
+)
 
 cam_agent = LlmAgent(
     name="cam_agent",
     model=get_model(),
-    description=(
-        "Handles EVM and cost performance questions: CPI/SPI analysis, cost variance, "
-        "EAC projections, budget performance, and earned value metrics."
-    ),
+    description=_CAM_DESCRIPTION,
     instruction="""You are the CAM Agent, a specialist in earned value management and cost performance.
 
 Your primary job is to call the external CAM assistant using the call_cam_assistant tool.

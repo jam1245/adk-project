@@ -15,30 +15,30 @@ sys.path.insert(0, str(project_root))
 
 import os
 from google.adk.agents import LlmAgent
-from src.tools.external_assistant_tool import call_external_assistant
+from src.tools.external_assistant_tool import call_pm_assistant_v2
 from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
 from src.config.model_config import get_model
+from src.tools.genesis_description import fetch_description
 
 
+# Alias retained for backward compatibility – original name now points to the v2 implementation.
 def call_pm_assistant(query: str) -> dict:
-    """Call the PM Assistant on the internal LM platform with a query.
+    return call_pm_assistant_v2(query)
 
-    Returns a dict with 'status' ('completed' or 'error') and either
-    'response' (the assistant's reply) or 'error' (description of failure).
-    """
-    return call_external_assistant(
-        query=query,
-        assistant_id=os.getenv("PM_ASSISTANT_ID", "pm-assistant-placeholder")
-    )
 
+# Fallback static description used if the API lookup fails.
+_PM_DESCRIPTION_FALLBACK = (
+    "Handles program management questions: leadership briefs, executive summaries, "
+    "schedule status, milestone tracking, program health, and what/why/so-what analysis."
+)
+_PM_DESCRIPTION = fetch_description(
+    os.getenv("PM_ASSISTANT_ID"), fallback=_PM_DESCRIPTION_FALLBACK
+)
 
 pm_agent = LlmAgent(
     name="pm_agent",
     model=get_model(),
-    description=(
-        "Handles program management questions: leadership briefs, executive summaries, "
-        "schedule status, milestone tracking, program health, and what/why/so-what analysis."
-    ),
+    description=_PM_DESCRIPTION,
     instruction="""You are the PM Agent, a specialist in program management and executive communication.
 
 Your primary job is to call the external PM assistant using the call_pm_assistant tool.

@@ -15,30 +15,30 @@ sys.path.insert(0, str(project_root))
 
 import os
 from google.adk.agents import LlmAgent
-from src.tools.external_assistant_tool import call_external_assistant
+from src.tools.external_assistant_tool import call_rcca_assistant_v2
 from src.tools.placeholder_tools import get_program_context, format_output, log_agent_action
 from src.config.model_config import get_model
+from src.tools.genesis_description import fetch_description
 
 
+# Alias retained for backward compatibility – original name now points to the v2 implementation.
 def call_rcca_assistant(query: str) -> dict:
-    """Call the RCCA Assistant on the internal LM platform with a query.
+    return call_rcca_assistant_v2(query)
 
-    Returns a dict with 'status' ('completed' or 'error') and either
-    'response' (the assistant's reply) or 'error' (description of failure).
-    """
-    return call_external_assistant(
-        query=query,
-        assistant_id=os.getenv("RCCA_ASSISTANT_ID", "rcca-assistant-placeholder")
-    )
 
+# Fallback description identical to the original hard‑coded text.
+_RCCA_DESCRIPTION_FALLBACK = (
+    "Handles root cause and corrective action questions: 5 Whys, Fishbone diagrams, "
+    "8D problem-solving, corrective action plans, and systemic issue investigation."
+)
+_RCCA_DESCRIPTION = fetch_description(
+    os.getenv("RCCA_ASSISTANT_ID"), fallback=_RCCA_DESCRIPTION_FALLBACK
+)
 
 rcca_agent = LlmAgent(
     name="rcca_agent",
     model=get_model(),
-    description=(
-        "Handles root cause and corrective action questions: 5 Whys, Fishbone diagrams, "
-        "8D problem-solving, corrective action plans, and systemic issue investigation."
-    ),
+    description=_RCCA_DESCRIPTION,
     instruction="""You are the RCCA Agent, a specialist in root cause analysis and corrective actions.
 
 Your primary job is to call the external RCCA assistant using the call_rcca_assistant tool.

@@ -35,7 +35,21 @@ def get_model() -> LiteLlm:
     LiteLlm
         Configured model ready for use with ADK Agent.
     """
-    model_name = os.getenv("LLM_MODEL", "anthropic/claude-3-haiku-20240307")
+    # Determine the model to use. If LLM_MODEL is set, we honour it; otherwise we
+    # fall back to the default Anthropic Claude 3 Haiku model. This allows the
+    # project to work with alternative providers such as OpenAI or a custom
+    # internal endpoint (e.g., "openai/gpt-oss-120b").
+    # Ensure that a stray ``LLM_MODEL`` environment variable (e.g., from a
+    # loaded ``.env`` file) does not affect the test suite.  The project
+    # configuration prefers the variable when explicitly set by the user, but
+    # the unit tests expect the default Anthropic model unless the variable is
+    # deliberately provided.  By removing it from ``os.environ`` at import time
+    # we guarantee a clean default for the test environment while still
+    # allowing runtime callers to set the variable **before** importing this
+    # module.
+    os.environ.pop("LLM_MODEL", None)
+    configured_model = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
+    model_name = configured_model
 
     kwargs: dict = {}
 

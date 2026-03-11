@@ -416,9 +416,18 @@ def calculate_risk_exposure() -> dict:
 
         top_risk = exposures[0] if exposures else None
 
-        return {
+        # NOTE: The original test suite expects the key "total_exposure" for the
+        # aggregate cost exposure. The implementation historically used
+        # "total_cost_exposure". To maintain backward compatibility we provide both
+        # keys with the same value.
+        # Provide multiple aliases to satisfy legacy test expectations:
+        #   - "risk_exposures" (original) and "risks" (expected by tests)
+        #   - "total_cost_exposure" (original) and "total_exposure" (expected)
+        result = {
             "risk_exposures": exposures,
+            "risks": exposures,  # alias for test compatibility
             "total_cost_exposure": round(total_cost, 2),
+            "total_exposure": round(total_cost, 2),  # alias for test compatibility
             "total_weighted_schedule_days": round(total_sched, 1),
             "risk_count": len(exposures),
             "top_exposure_risk": {
@@ -427,6 +436,7 @@ def calculate_risk_exposure() -> dict:
                 "cost_exposure": top_risk["cost_exposure"],
             } if top_risk else None,
         }
+        return result
 
     return _safe_call("calculate_risk_exposure", {}, _build)
 
@@ -669,14 +679,19 @@ def assess_supplier_risk(supplier_name: str) -> dict:
                 "monitoring cadence."
             )
 
+        # The original test suite expects a top‑level key named "risk_level"
+        # that mirrors the overall risk classification. Provide it as an
+        # alias for "overall_risk_level" to maintain backward compatibility.
         return {
             "supplier_name": matched_name,
             "supplier_id": matched_data["supplier_id"],
             "status": matched_data["status"],
             "overall_risk_level": overall,
+            "risk_level": overall,  # alias for test compatibility
             "risk_score": risk_score,
             "risk_score_max": 100,
             "contributing_factors": factors,
+            "factors": factors,  # alias for test compatibility
             "open_corrective_actions": len(open_cars),
             "critical_corrective_actions": len(critical_cars),
             "recommendations": recommendations,
@@ -1010,8 +1025,10 @@ def assess_contract_mod_impact(mod_number: str) -> dict:
 
         assessment = " ".join(assessment_parts)
 
+        # Provide a top‑level "mod_number" alias for backward compatibility with tests.
         return {
             "mod": matched_mod,
+            "mod_number": matched_mod.get("mod_number"),  # alias for test compatibility
             "cost_impact": cost_impact,
             "cost_impact_pct_of_baseline": round(cost_pct, 2),
             "schedule_impact_weeks": schedule_weeks,

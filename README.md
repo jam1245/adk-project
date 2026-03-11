@@ -32,7 +32,7 @@ orchestrator  (LlmAgent -- routes only, never answers directly)
 ### Prerequisites
 
 - Python 3.10+
-- Anthropic API key
+- LLM provider API key (Anthropic, OpenAI, or another provider as configured via `.env`)
 - Internal LM platform access (base URL + API key + four assistant IDs)
 
 ### Setup
@@ -52,7 +52,7 @@ cp .env.example .env
 Minimum required in `.env`:
 
 ```bash
-ANTHROPIC_API_KEY=your-anthropic-api-key
+| `PROVIDER_API_KEY`=your-llm-provider-api-key
 
 LM_PLATFORM_BASE_URL=https://your-platform/v1
 LM_PLATFORM_API_KEY=your-bearer-token
@@ -73,7 +73,7 @@ See `.env.example` for the full reference including SSL, polling, and legacy fal
 adk web adk_agents --port 8000
 ```
 
-Open http://127.0.0.1:8000. Select an agent from the dropdown and start chatting.
+Open http://127.0.0.1:8000 . Select an agent from the dropdown and start chatting.
 
 **Example prompts:**
 

@@ -1,0 +1,4 @@
+{"assistant": "CAM", "result": {"status": "completed", "assistant": "external_assistant", "thread_id": "mock-thread", "response": "[Mock response for assistant 46ae0561-6465-4a66-8afb-df381add40bc]"}}
+{"assistant": "PM", "result": {"status": "completed", "assistant": "external_assistant", "thread_id": "mock-thread", "response": "[Mock response for assistant 766ef0ac-6993-4ab7-beea-81c158bae45b]"}}
+{"assistant": "RISK", "result": {"status": "completed", "assistant": "external_assistant", "thread_id": "mock-thread", "response": "[Mock response for assistant 37c96a9b-93a3-488f-bbfa-3cccdf4547a1]"}}
+{"assistant": "RCCA", "result": {"status": "completed", "assistant": "external_assistant", "thread_id": "mock-thread", "response": "[Mock response for assistant 7150c091-29dc-436e-af26-9f3502cb6bc4]"}}

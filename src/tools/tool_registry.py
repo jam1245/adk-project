@@ -163,7 +163,14 @@ class ToolRegistry:
 
         # Wrap each function exactly once
         for name, fn in seen_functions.items():
-            self._tools[name] = FunctionTool(fn)
+            ft = FunctionTool(fn)
+            # The testing suite expects the wrapped tool to expose the original
+            # callable via a "_func" attribute (mirroring the historic ADK API).
+            # The official FunctionTool uses the attribute "func". To remain
+            # compatible with both the library and the unit tests we add an
+            # alias.
+            setattr(ft, "_func", fn)
+            self._tools[name] = ft
 
         # Pre-build per-agent FunctionTool lists for fast retrieval
         self._agent_tools: Dict[str, List[FunctionTool]] = {}

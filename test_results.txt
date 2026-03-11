@@ -1,0 +1,34 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.9, pytest-9.0.2, pluggy-1.6.0 -- C:\Program Files\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: c:\Users\e394102\OneDrive - Lockheed Martin US\EPT\tests\adk-project
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, langsmith-0.7.12
+collecting ... collected 4 items
+
+tests/test_assistants.py::test_assistant_response[cam-46ae0561-6465-4a66-8afb-df381add40bc] PASSED
+tests/test_assistants.py::test_assistant_response[pm-766ef0ac-6993-4ab7-beea-81c158bae45b] PASSED
+tests/test_assistants.py::test_assistant_response[risk-37c96a9b-93a3-488f-bbfa-3cccdf4547a1] PASSED
+tests/test_assistants.py::test_assistant_response[rcca-7150c091-29dc-436e-af26-9f3502cb6bc4] PASSED
+
+============================== warnings summary ===============================
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py:1428
+  C:\Users\e394102\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py:1428: PytestConfigWarning: Unknown config option: asyncio_default_fixture_loop_scope
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py:1428
+  C:\Users\e394102\AppData\Roaming\Python\Python312\site-packages\_pytest\config\__init__.py:1428: PytestConfigWarning: Unknown config option: asyncio_mode
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+tests/test_assistants.py::test_assistant_response[cam-46ae0561-6465-4a66-8afb-df381add40bc]
+tests/test_assistants.py::test_assistant_response[pm-766ef0ac-6993-4ab7-beea-81c158bae45b]
+tests/test_assistants.py::test_assistant_response[risk-37c96a9b-93a3-488f-bbfa-3cccdf4547a1]
+tests/test_assistants.py::test_assistant_response[rcca-7150c091-29dc-436e-af26-9f3502cb6bc4]
+  C:\Users\e394102\AppData\Roaming\Python\Python312\site-packages\urllib3\connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'api.ai.us.lmco.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 4 passed, 6 warnings in 1.25s ========================
+
