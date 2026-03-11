@@ -270,7 +270,7 @@ def call_external_assistant(query: str, assistant_id: str) -> dict:
                 time.sleep(backoff)
                 continue
 
-            # Non-retryable or final attempt — return error
+            # Non-retryable or final attempt -- return error
             logger.error(
                 "External assistant failed: id=%s attempt=%d/%d elapsed=%.0fms error=%s: %s",
                 assistant_id, attempt, max_retries, elapsed_ms, type(exc).__name__, exc,

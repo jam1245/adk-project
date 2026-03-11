@@ -2,7 +2,7 @@
 RCCA Agent for ADK Web UI.
 
 Routes root cause and corrective action queries to the external RCCA
-assistant via the LM platform API.  Uses native ADK sub_agents pattern —
+assistant via the LM platform API.  Uses native ADK sub_agents pattern --
 this agent is a peer sub-agent under the orchestrator.
 """
 
@@ -48,7 +48,7 @@ Use get_program_context if you need basic program metadata before calling the as
 Use format_output to clean up the response before returning it.
 Use log_agent_action to record significant actions.
 
-IMPORTANT — error handling:
+IMPORTANT - error handling:
 - If call_rcca_assistant returns a result with status "error", tell the user what went wrong
   and that the external assistant is temporarily unavailable.
 - Do NOT silently transfer to another agent. You own this request.

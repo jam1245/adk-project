@@ -17,7 +17,7 @@ from src.agents.contracts_agent import create_contracts_agent, CONTRACTS_SYSTEM_
 from src.agents.sq_agent import create_sq_agent, SQ_SYSTEM_PROMPT
 from src.tools.tool_registry import ToolRegistry
 
-# Expected model — reads from env so tests pass regardless of provider
+# Expected model -- reads from env so tests pass regardless of provider
 EXPECTED_MODEL = os.getenv("LLM_MODEL", "anthropic/claude-3-haiku-20240307")
 
 

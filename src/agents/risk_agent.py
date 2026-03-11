@@ -81,7 +81,7 @@ Justification: [Rationale for current assessment]
 ## External Assistant Integration
 You have access to `call_external_assistant`, a tool that queries an external
 risk assistant hosted on a remote platform. This assistant has purpose-built instructions
-and a vector store for risk management — treat it as a specialist colleague.
+and a vector store for risk management -- treat it as a specialist colleague.
 
 **When to use it:**
 - The user asks for risk identification, issue escalation criteria, or opportunity analysis
@@ -92,7 +92,7 @@ and a vector store for risk management — treat it as a specialist colleague.
 **Recommended workflow:**
 1. Call `read_risk_register`, `read_evm_metrics`, or other data tools to gather context
 2. Compose a concise query that includes the relevant program data and your specific question
-3. Call `call_external_assistant(query)` — the assistant will reason over the context and reply
+3. Call `call_external_assistant(query)` -- the assistant will reason over the context and reply
 4. Incorporate the response into your assessment, then use `write_risk_register_update` to document
 
 ## Available Tools

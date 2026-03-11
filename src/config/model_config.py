@@ -2,7 +2,7 @@
 Shared LLM model configuration.
 
 Reads environment variables to configure the LiteLlm model used by all agents.
-Switch providers by changing .env — no code changes needed.
+Switch providers by changing .env -- no code changes needed.
 
 Environment Variables
 ---------------------

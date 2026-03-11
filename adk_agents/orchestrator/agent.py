@@ -25,7 +25,7 @@ from adk_agents.cam_agent.agent import cam_agent
 # Import centralized model configuration
 from src.config.model_config import get_model
 
-# IMPORTANT: sub_agents — NOT tools. This is native ADK agent handoff, not tool-calling.
+# IMPORTANT: sub_agents -- NOT tools. This is native ADK agent handoff, not tool-calling.
 orchestrator = LlmAgent(
     name="orchestrator",
     model=get_model(),

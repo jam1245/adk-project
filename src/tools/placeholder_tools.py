@@ -12,7 +12,7 @@ def get_program_context() -> dict:
         "program": "AFP",
         "status": "active",
         "phase": "execution",
-        "note": "Placeholder — connect to real data source later"
+        "note": "Placeholder -- connect to real data source later"
     }
 
 
