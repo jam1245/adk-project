@@ -26,7 +26,7 @@ def call_rcca_assistant(query: str) -> dict:
     return call_rcca_assistant_v2(query)
 
 
-# Fallback description identical to the original hard‑coded text.
+# Fallback description 
 _RCCA_DESCRIPTION_FALLBACK = (
     "Handles root cause and corrective action questions: 5 Whys, Fishbone diagrams, "
     "8D problem-solving, corrective action plans, and systemic issue investigation."

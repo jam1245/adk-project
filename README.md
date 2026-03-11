@@ -32,7 +32,7 @@ orchestrator  (LlmAgent -- routes only, never answers directly)
 ### Prerequisites
 
 - Python 3.10+
-- LLM provider API key (Anthropic, OpenAI, or another provider as configured via `.env`)
+- Anthropic API key
 - Internal LM platform access (base URL + API key + four assistant IDs)
 
 ### Setup
@@ -52,7 +52,7 @@ cp .env.example .env
 Minimum required in `.env`:
 
 ```bash
-| `PROVIDER_API_KEY`=your-llm-provider-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
 
 LM_PLATFORM_BASE_URL=https://your-platform/v1
 LM_PLATFORM_API_KEY=your-bearer-token
